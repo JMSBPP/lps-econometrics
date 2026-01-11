@@ -8,58 +8,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-@dataclass
-class TimeInterval:
-    startTime
-    endTime
-
-@dataclass
-class TimeData:
-    """Represents a point in time on the blockchain."""
-    block_number: int
-    block_timestamp: int
-    unix_timestamp: int
-    date: Optional[datetime] = None
-
-    def __post_init__(self):
-        if self.date is None:
-            self.date = datetime.utcfromtimestamp(self.unix_timestamp)
-
-
-class Filter(Enum):
-    """Filter criteria for finding specific time periods."""
-    NUMBER_OF_ACTIVE_LPS = auto()  # Time with most active liquidity providers
-    MAX_LIQUIDITY_USD = auto()     # Time with highest USD liquidity
-    MAX_VOLUME_USD = auto()        # Time with highest USD volume
-    MAX_TRANSACTIONS = auto()      # Time with most transactions
-
-
-class Frequency(Enum):
-    """Time grouping frequency for data aggregation."""
-    HOUR = "hour"
-    DAY = "day"
-    WEEK = "week"
-    MONTH = "month"
-    YEAR = "year"
-
-
-
-class ClientWrapper:
-    DEFAULT_ENDPOINT = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2"
-    def __init__(self, endpoint:Optional[str]):
-        self.endpoint = endpoint or os.getenv("INDEXER") or self.DEFAULT_ENDPOINT
-
-    def endpoint(self) -> str:
-        return self.endpoint
-    def post(self, query: str, variables: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Execute a GraphQL query against the subgraph."""
+class Client:
+    ENDPOINT = os.getenv("INDEXER")
+    def __call__(self, query: str, variables: Optional[Dict[str, Any]] = None)-> Dict[str, Any]:
         payload = {"query": query}
         if variables:
             payload["variables"] = variables
 
         response = requests.post(
-            self.endpoint,
+            ENDPOINT,
             json=payload,
             headers={"Content-Type": "application/json"}
         )
@@ -70,63 +27,6 @@ class ClientWrapper:
             raise Exception(f"GraphQL errors: {result['errors']}")
 
         return result.get("data", {})
-
-
-class PoolData:
-    def __init__(self,token0: str, token1: str):
-        self.poolKey = self.getPoolKey(token0: str, token1: str)
-        self.client = ClientWrapper()    
-
-    def poolKey(self) -> PoolKey:
-        return self.poolKey
-    
-    def client(self) -> ClientWrapper:
-        return self.client
-
-    def getPoolKey(self,token0: str, token1: str)-> PoolKey:
-    
-       query = """
-        query GetPair($token0: String!, $token1: String!) {
-            pairs(
-                where: {
-                    or: [
-                        {token0: $token0, token1: $token1},
-                        {token0: $token1, token1: $token0}
-                    ]
-                }
-                first: 1
-            ) {
-                id
-            }
-        }
-        """
-        data = self.client.post(query, {"token0": self.token0, "token1": self.token1})
-
-        pairs = data.get("pairs", [])
-        if pairs:
-            poolKey =PoolKey(token0, token1, pairs[0]["id"])
-            return poolKey
-        return None
-
-        
-
-class UniswapData:
-
-    def __init__(self, token0: str, token1: str, endpoint: Optional[str] = None):
-        """
-        Initialize UniswapData client for a specific token pair.
-
-        Args:
-            token0: Address of the first token (checksummed or lowercase)
-            token1: Address of the second token (checksummed or lowercase)
-            endpoint: Optional custom subgraph endpoint (uses INDEXER env var or default)
-        """
-        self.token0 = token0.lower()
-        self.token1 = token1.lower()
-        self.endpoint = endpoint or os.getenv("INDEXER") or self.DEFAULT_ENDPOINT
-        self._pair_id: Optional[str] = None
-        self._pair_info: Optional[PairInfo] = None
-
 
 
     def get_pair_info(self) -> Optional[PairInfo]:

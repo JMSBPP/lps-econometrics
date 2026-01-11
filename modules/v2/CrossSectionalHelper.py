@@ -1,16 +1,15 @@
+
+from types.PoolKey import PoolKey
 from UniswapData import *
 from pandas import pd.DataFrame
 from pandas import pd.Series
 
 
+@dataclass
+class Snapshot(pd.series):
 
-class Snapshot(pd.Series):
-    def __init__(self,time: TimeData):
-        self.time TimeData
-        
-    def time(self):
-        return self.time
 
+def fetchPoolInventory(poolKey: PoolKey) -> 
 class CrossSectionalHelper:
     def __init__(self, token0: str, token1: str):
         self.aggDataEndpoint = UniswapData(token0=token0,token1=token1)

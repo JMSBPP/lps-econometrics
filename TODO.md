@@ -1,1 +1,6 @@
-Pg 14 --> Behavioral Encapsulation
+
+
+
+
+# Python Functional Programming
+-  Pg 14 --> Behavioral Encapsulation

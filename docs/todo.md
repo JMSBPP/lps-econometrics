@@ -1,0 +1,1 @@
+- Connect optimal exit time (dual optimal for the ask price, parameterized by the optimal curvature control parameter) with the time dependency of the variance swap's nature. (A CFMM lives on state space, not on time space.)

@@ -1,14 +1,16 @@
-import types.PoolKey
+from types.PoolKey import PoolKey
+from types.ArgsTypes import *
 
 
-class TimeSeriesHelper():
-    def __init__(self,token0: str, token1: str):
-        self.poolData = PoolData(token0,token1)
-        self.poolKey = self.poolData.poolKey 
+def getTimeFor(
+    client: Client,
+    poolKey: PoolKey,
+    timeRange: TimeRange,
+    frequency: Frequency,
+    query: Query
+) -> TimeData:
 
-    def getTimeFor(self, by: Filter,frequency: Frequency, timeInterval: TimeInterval) -> TimeData: 
-    
-    def getPriceSeries(self,frequency: Frequency, timeInterval: TimeInterval) -> pd.Series:
+
     
 
 
